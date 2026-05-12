@@ -15,5 +15,14 @@ def jd_extractor(state: AgentState):
     response = chain.invoke({
         "job_description": jd
     })
+    output = response.model_dump()
 
-    return response
+    return {
+        "jd": jd,
+        "org": output.get("org", ""),
+        "role": output.get("role", ""),
+        "department": output.get("department", ""),
+        "hard_skills": output.get("hard_skills", ""),
+        "soft_skills": output.get("soft_skills", ""),
+        "key_words": output.get("key_words", "")
+    }
