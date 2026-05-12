@@ -13,3 +13,5 @@ def jd_extractor(state: AgentState):
     response = chain.invoke({
         "job_description": jd
     })
+
+    return response
