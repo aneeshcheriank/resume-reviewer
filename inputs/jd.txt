@@ -1,0 +1,82 @@
+About the job
+Location: Remote or hybrid within one of the following countries: Germany, Spain, Romania, Netherlands, Austria, UK, France
+Contract: full time / indefinite
+Language(s): English (C1/ C2)
+
+
+Serrala is the global leader in finance process automation. For over 40 years, we have been advancing the office of the CFO with our award-winning suite of finance automation applications.
+
+
+Our solutions streamline all working capital-related processes, including Order to Cash, Procure to Pay, Cash Flow Management, and Treasury, across both cloud and SAP environments.
+
+
+Our 10+ hubs across Europe, North America, and India support over 2,800 clients worldwide, reflecting the trust we've built with a diverse global community.
+
+
+Join us as we lead the future of finance automation!
+
+
+Shape the future of AI in enterprise finance.
+
+
+
+Serrala is building an Agentic AI Execution Layer to deliver production-grade AI agents embedded into finance workflows across Accounts Receivable, Accounts Payable, and Payments & Cash.
+
+
+The AI Engineer will build production-grade agents (not demos) - from single-purpose expert agents to orchestrated multi-agent workflows, using Serrala’s standardized AI platform patterns (RAG, tool calling, memory, evaluation, observability, and governance).
+
+
+The role requires a strong engineering mindset: reliable behavior, finance-grade failure handling, human-in-the-loop controls, and measurable performance across cost, latency, and quality.
+
+
+This role operates within Serrala where the central AI team owns reusable AI services (gateway, RAG, orchestration, evaluation, guardrails, observability/FinOps) and domain teams productize outcomes.
+
+
+Your Day to Day:
+
+
+
+Build production-grade AI agents (single → multi-agent workflows) with reliable reasoning, tool usage, state handling, and safe fallbacks.
+Design auditable, finance-grade workflows with guardrails, approvals, explainability, and full traceability.
+Implement RAG, tool calling, and memory patterns grounded in enterprise data
+Instrument agents with telemetry & evaluation to optimize quality, cost, latency, and reliability.
+Integrate agents into SAP-embedded and SaaS products, following enterprise security and rollout standards.
+Ship with excellence: CI/CD, logging, diagnostics, and quality gates.
+
+
+What makes you excel in this position:
+
+
+
+4+ years of software engineering experience, incl. 1–2+ years with LLM/agentic systems.
+Strong hands-on skills in prompting, RAG, orchestration, tool calling, and reliability patterns.
+Experience with deterministic + probabilistic systems and human-in-the-loop flows.
+Solid engineering fundamentals and comfort in enterprise environments (auditability, access control).
+Finance / ERP experience (AR, AP, Payments) is strongly preferred.
+LLM evaluation frameworks and agent orchestration patterns are a strong plus.
+You build production systems, not demos.
+You think in controls, failure modes, and trust.
+You balance speed, correctness, and cost.
+
+
+Why you’ll love it here
+
+
+
+Step into a dynamic, agile workplace where continuous learning is championed by leadership, and innovation in finance automation is fuelled by cutting-edge tech, AI integration, and strategic SAP transformation. We partner with the best to stay ahead - so you can too.
+
+
+At our core, we're Reliable, Passionate, Empowering, and Enterprising - committed to lasting customer and employee relationships, bold innovation, and your growth every step of the way.
+
+
+EEO Statement
+
+
+
+We are proud to be an equal opportunity workplace. We celebrate and support diversity by providing equal employment opportunities regardless of race, creed, color, religion, age, sex, national origin, disability or handicap, genetics, protected veteran status, sexual orientation, gender identity or expression, arrest record, or any other characteristic protected by federal, state, or local laws.
+
+
+To all recruitment agencies
+
+Serrala does not accept agency resumes. Please do not forward resumes to our job alias, Serrala employees or any other organization location. Serrala is not responsible for any fees related to unsolicited resumes.
+
