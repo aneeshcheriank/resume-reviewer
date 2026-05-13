@@ -3,8 +3,11 @@ import operator
 
 
 class AgentState(TypedDict):
+
+    query: str
+
     resume: str
-    jd: str
+    job_description: str
     cover_letter: str
 
     # jd extractor
@@ -22,3 +25,4 @@ class AgentState(TypedDict):
     product: str
     product_and_services: str
     competition: str
+    project_research_iteration: int
