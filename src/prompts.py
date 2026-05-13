@@ -11,7 +11,8 @@ jd_keyword_extraction_prompt = ChatPromptTemplate([
     - hard_skills: the hard skills (without these skills one can't work in this role, like techical skills) e.g. python, langchain
     - soft_skills: the skills nice to have, but not necessary to perform the work e.g. communicaton, team management, 
 """),
-("human", "{job_description}")
+("human", "{job_description}"),
+("human", "{query}")
 ])
 
 project_researcher_prompt = ChatPromptTemplate([
@@ -31,4 +32,14 @@ project_researcher_prompt = ChatPromptTemplate([
      - do not make up information, use tools to research on the {organization} and {department}
      - use tools wisely do not make unnecessary tool calls
      """)
+])
+
+summary_research_prompt = ChatPromptTemplate([
+    ("system", """
+    You are an expert writer, who is experience in writing complex concetps in very concise and clear way. summarize the details in this User, AI, tool conersation.
+    IMPORTANT:
+     - please dont assume anything, summarize the facts in the conversation
+     - please omit any information in the conversation
+    """),
+    ("human" "{chat_history}")
 ])
