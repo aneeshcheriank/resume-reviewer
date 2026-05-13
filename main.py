@@ -40,12 +40,11 @@ if __name__== "__main__":
         # project_research
         "projects",
         "business_model",
-        "product",
         "product_and_services",
         "competition"
     ]
     for key in keys:
-        print(response.get(key))
+        print(f"{key}: {response.get(key)}")
         print("\n")
 
     
