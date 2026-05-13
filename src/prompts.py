@@ -43,3 +43,11 @@ summary_research_prompt = ChatPromptTemplate([
     """),
     ("human" "{chat_history}")
 ])
+
+project_formatter_prompt = ChatPromptTemplate([
+    ("system", """"
+    You are an expert senior business content writer. 
+    Review the following research context and extract the final details into the required structured format.
+     """),
+    ("human", "{summary}")
+])
