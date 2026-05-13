@@ -22,7 +22,6 @@ class AgentState(TypedDict):
     research_history: Annotated[list, operator.add]
     projects: list
     business_model: str
-    product: str
     product_and_services: str
     competition: str
     project_research_iteration: int
