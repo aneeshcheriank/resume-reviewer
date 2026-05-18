@@ -25,3 +25,8 @@ class AgentState(TypedDict):
     product_and_services: str
     competition: str
     project_research_iteration: int
+
+    # resume score
+    resume_score: int
+    detailed_score: dict
+    details: str

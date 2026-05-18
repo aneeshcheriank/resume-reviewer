@@ -14,14 +14,13 @@ def jd_extractor(state: AgentState):
 
     chain = prompt | llm_with_structured_output
     response = chain.invoke({
-        "job_description": state['job_description'],
-        "query": state["query"]
+        "job_description": state['job_description']
     })
     output = response.model_dump()
 
     return {
         "jd": jd,
-        "organization": output.get("org", ""),
+        "organization": output.get("organization", ""),
         "role": output.get("role", ""),
         "department": output.get("department", ""),
         "hard_skills": output.get("hard_skills", []),
@@ -85,4 +84,24 @@ def project_formatter(state: AgentState):
          "business_model": output.get("business_model"),
          "product_and_services": output.get("product_and_services"),
          "competition": output.get("competition")
+    }
+
+def resume_scorer(state: AgentState):
+    prompt = prompts.resume_scoring_prompt
+    llm = get_llm()
+    llm_with_structured_output = llm.with_structured_output(schema.ResumeScore)
+
+    chain = prompt | llm_with_structured_output
+    response = chain.invoke({
+        "resume": state["resume"],
+        "hard_skills": state["hard_skills"],
+        "soft_skills": state["soft_skills"],
+        "keywords": state["keywords"]
+    })
+
+    output = response.model_dump()
+    return {
+        "resume_score": output.get("resume_score", 0),
+        "detailed_score": output.get("detailed_score", {}),
+        "details": output.get("details", "")
     }

@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field
 
 class JDExtractorSchema(BaseModel):
-    org: str = Field(description="the organization in which the postion is vaccant")
+    organization: str = Field(description="the organization in which the postion is vaccant")
     role: str = Field(description="the organization in which the postion is vaccant")
     department: str = Field(description="the organization in which the postion is vaccant")
     hard_skills: str = Field(description="the organization in which the postion is vaccant")
@@ -13,3 +13,16 @@ class ProjectResearcher(BaseModel):
     product_and_services: str = Field(description="Product and services of the organization")
     competition: str = Field(description="Compatition and competetors for the organization")
     important_projects: list[str] = Field(description="list of important projects the department is doing for the organization and why the project is important")
+
+class IndividualScore(BaseModel):
+    hard_skills_score: int = Field(description="Resume score against hard skills")
+    soft_skills_score: int = Field(description="Resume score against soft skills")
+    keywords_score: int = Field(description="Resume score against keywords")
+
+class ResumeScore(BaseModel):
+    resume_score: int = Field(description="Total score of the resume agains the job description")
+    detailed_score: IndividualScore = Field(description="Score optained in various categores")
+    details: str = Field(description = "The resons for assining the above score")
+    
+
+    
