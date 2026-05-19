@@ -133,7 +133,7 @@ def resume_writer(state: AgentState):
 
 def router_resume_writer(state:AgentState):
     print(f"resume score: {state['resume_score']}")
-
+    print(f"resume write iteration: {state["resume_write_iteration"]}")
     if state["resume_write_iteration"] >= config.max_resume_write_iteration:
         print(state["resume"])
         return END
