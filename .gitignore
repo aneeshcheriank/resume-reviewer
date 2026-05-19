@@ -221,3 +221,10 @@ __marimo__/
 resume.pdf
 resume.doc
 resume.docx
+Resume.pdf
+
+# output
+output/
+
+# input
+inputs/
