@@ -4,8 +4,6 @@ import operator
 
 class AgentState(TypedDict):
 
-    query: str
-
     resume: str
     job_description: str
     cover_letter: str
@@ -30,3 +28,7 @@ class AgentState(TypedDict):
     resume_score: int
     detailed_score: dict
     details: str
+
+    # resume writer
+    resume_modification_explanation: str
+    resume_write_iteration: int

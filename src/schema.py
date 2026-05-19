@@ -23,6 +23,10 @@ class ResumeScore(BaseModel):
     resume_score: int = Field(description="Total score of the resume agains the job description")
     detailed_score: IndividualScore = Field(description="Score optained in various categores")
     details: str = Field(description = "The resons for assining the above score")
+
+class ResumeWriter(BaseModel):
+    resume: str = Field(description="modified resume")
+    explanation: str = Field(description="rationlie behiend the modification")
     
 
     
