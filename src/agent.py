@@ -121,14 +121,14 @@ def resume_writer(state: AgentState):
         "keywords": state["keywords"],
         "resume_score": state["resume_score"],
         "scoring_details": state["details"],
-        "detailed_score": state["detailed_score"],
-        "resume_write_iteration": state["resume_write_iteration"] + 1
+        "detailed_score": state["detailed_score"]
     })
 
     output = response.model_dump()
     return {
         "resume": output.get("resume", ""),
-        "resume_modification_explanation": output.get("explanation", "")
+        "resume_modification_explanation": output.get("explanation", ""),
+        "resume_write_iteration": state["resume_write_iteration"] + 1
     }
 
 def router_resume_writer(state:AgentState):
