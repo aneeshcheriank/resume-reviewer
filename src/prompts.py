@@ -92,30 +92,66 @@ Please evaluate the following candidate data:
 """)
 ])
 
+# resume_writer_prompt = ChatPromptTemplate([
+#     ("system", """
+#      You are a senior resume writer, have decades of experience in writing technical resumes. You have very strong knowledge in the field of data science
+#      and artificial intelligence. You have helped multiple junior to senior people by writing effective resumes based on the job description to land on their 
+#      dream jobs.
+#      Your task is to better articulate the user's existing experience to match the JD. You are strictly forbidden from adding new skills, tools, technologies, 
+#      or job responsibilities that do not exist in the Original Resume. Do not fabricate history. If a JD keyword is missing from the original resume, do not 
+#      invent an experience for it; instead, highlight transferable skills."   
+
+#      IMPORTANT:
+#      - Keep all the resume sections. do not delete or omit any section of the resume, rewrite the bullet and points
+#      - Dont alter the headdings and sub headdings of the resume
+#      - Try to incorporate the changes in the job-skills and in the experience section
+#      - Keep the structure of the resume intact 
+#     """),
+#     ("human", """
+#      Please rewrite the resume using the following details:
+
+#      resume: {resume}
+#      hard skills in job description: {hard_skills}
+#      soft skills in job description: {soft_skills}
+#      keywords in job description: {keywords}
+#      ats resume score: {resume_score}
+#      score details: {detailed_score}
+#      detailed explanation (reason for score): {scoring_details}
+#     """)
+# ])
+
 resume_writer_prompt = ChatPromptTemplate([
     ("system", """
-     You are a senior resume writer, have decades of experience in writing technical resumes. You have very strong knowledge in the field of data science
-     and artificial intelligence. You have helped multiple junior to senior people by writing effective resumes based on the job description to land on their 
-     dream jobs.
-     Your task is to better articulate the user's existing experience to match the JD. You are strictly forbidden from adding new skills, tools, technologies, 
-     or job responsibilities that do not exist in the Original Resume. Do not fabricate history. If a JD keyword is missing from the original resume, do not 
-     invent an experience for it; instead, highlight transferable skills."   
+     You are an elite, executive-level technical resume writer specializing in Data Science and AI. 
+     Your goal is to optimize the user's resume to align with a specific Job Description (JD) without changing reality.
 
-     IMPORTANT:
-     - Keep all the resume sections. do not delete or omit any section of the resume, rewrite the bullet and points
-     - Dont alter the headdings and sub headdings of the resume
-     - Try to incorporate the changes in the job-skills and in the experience section
-     - Keep the structure of the resume intact 
+     CRITICAL RULES FOR REWRITING BULLET POINTS:
+     1. NO HALLUCINATIONS: You are strictly forbidden from adding tools, technologies, responsibilities, or skills that do not exist in the Original Resume.
+     2. WORD STUFFING PROHIBITED: Do not append a laundry list of JD keywords to the end of sentences using em-dashes (—) or clauses. Integrating keywords must feel natural, concise, and professional.
+     3. KEEP STRUCTURE: Keep all resume sections, headings, dates, and companies exactly intact. Only refine the text content of the bullet points.
+     4. QUANTIFIABLE IMPACT: Prioritize metrics (%, $, time saved). If a bullet point has a metric, keep it.
+     5. STYLE: Write in crisp, active business language. Avoid overly dense, repetitive academic phrases.
     """),
     ("human", """
-     Please rewrite the resume using the following details:
+     Analyze the following resume and feedback data. Rewrite the bullet points inside the 'JOB SKILLS' and 'EXPERIENCE' sections to organically address the gaps noted in the scoring details, WITHOUT fabricating any experience.
 
-     resume: {resume}
-     hard skills in job description: {hard_skills}
-     soft skills in job description: {soft_skills}
-     keywords in job description: {keywords}
-     ats resume score: {resume_score}
-     score details: {detailed_score}
-     detailed explanation (reason for score): {scoring_details}
+     Original Resume: 
+     {resume}
+
+     Target JD Highlights:
+     - Hard Skills Needed: {hard_skills}
+     - Soft Skills Needed: {soft_skills}
+     - Key Concepts: {keywords}
+
+     Optimization Feedback (Use this as internal guidance on what to improve):
+     - Current Score: {resume_score}
+     - Areas of Improvement: {detailed_score}
+     - Explanation: {scoring_details}
+
+     CRITICAL MARKUP REQUIREMENT:
+     Whenever you modify, refine, or rewrite an existing bullet point, wrap the entirely rewritten bullet point inside <modified> and </modified> tags. 
+     Example:
+     <modified>· Automated data mapping using an NLP model (Keras & pandas), reducing custodian onboarding time by 50% through production-grade pipeline reliability...</modified>
+     If a bullet point or section was completely unchanged, do not wrap it in tags.
     """)
 ])
