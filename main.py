@@ -1,6 +1,10 @@
+from pathlib import Path
+
 from src import chain
 from src.inputs import get_jd, get_resume
 from src.config import resume_path, jd_path
+
+output_path = "output/resume.txt"
 
 if __name__== "__main__":
     jd = get_jd(jd_path)
@@ -32,6 +36,13 @@ if __name__== "__main__":
         # resume writer
         "resume_write_iteration": 0
     })
+
+    file_path = Path(output_path)
+    file_path.parent.mkdir(parents=True, exist_ok=True)
+
+    with open(file_path, "w") as f:
+        f.write(response.get("resume", ""))
+
 
     keys  = [
         # "organization",
