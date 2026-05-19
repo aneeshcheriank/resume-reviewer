@@ -131,6 +131,12 @@ resume_writer_prompt = ChatPromptTemplate([
      3. KEEP STRUCTURE: Keep all resume sections, headings, dates, and companies exactly intact. Only refine the text content of the bullet points.
      4. QUANTIFIABLE IMPACT: Prioritize metrics (%, $, time saved). If a bullet point has a metric, keep it.
      5. STYLE: Write in crisp, active business language. Avoid overly dense, repetitive academic phrases.
+     STRICT DOMAIN ISOLATION: 
+     - Do not assume or cross-pollinate corporate domains. If the Job Description mentions enterprise software suites (e.g., ERP, CRM, SAP, Oracle) or specific 
+     financial operations workflows (e.g., AR, AP, invoicing, payroll), you are STRICTLY FORBIDDEN from adding these terms to the user's past roles unless those 
+     exact acronyms or tools are explicitly written in the Original Resume text. 
+     - If the original text says "investment data" or "portfolios", keep it strictly bound to investment and wealth management. Do not translate it into general 
+     corporate accounting or ERP contexts.
     """),
     ("human", """
      Analyze the following resume and feedback data. Rewrite the bullet points inside the 'JOB SKILLS' and 'EXPERIENCE' sections to organically address the gaps noted in the scoring details, WITHOUT fabricating any experience.
