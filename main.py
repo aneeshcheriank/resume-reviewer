@@ -9,8 +9,8 @@ output_path = "output/resume.txt"
 if __name__== "__main__":
     jd = get_jd(jd_path)
     resume = get_resume(resume_path)
-    build_cahin = chain.built_graph()
-    response = build_cahin.invoke({
+    build_chain = chain.built_graph()
+    response = build_chain.invoke({
 
         "resume": resume,
         "job_description": jd,

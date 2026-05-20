@@ -39,6 +39,8 @@ summary_research_prompt = ChatPromptTemplate([
     IMPORTANT:
      - please dont assume anything, summarize the facts in the conversation
      - please do not omit any important information in the conversation
+     CRITICAL: For the 'important_projects' field, you must provide an array/list of distinct strings (e.g., ["Project 1", "Project 2"]). Do NOT write a 
+     single running paragraph or essay block of text for this field. Break down your findings into individual project items.
     """),
     ("human", "{chat_history}")
 ])
