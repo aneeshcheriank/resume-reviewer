@@ -8,6 +8,10 @@ class AgentState(TypedDict):
     job_description: str
     cover_letter: str
 
+    # file paths for PDF editing
+    resume_pdf_path: str
+    cover_letter_pdf_path: str
+
     # jd extractor
     organization: str
     role: str
@@ -24,11 +28,10 @@ class AgentState(TypedDict):
     competition: str
     project_research_iteration: int
 
-    # resume score
-    resume_score: int
-    detailed_score: dict
-    details: str
-
     # resume writer
+    enhanced_resume: str
     resume_modification_explanation: str
-    resume_write_iteration: int
+
+    # cover letter writer
+    enhanced_cover_letter: str
+    cover_letter_modification_explanation: str

@@ -1,7 +1,11 @@
 """Tests for Pydantic schemas in src/schema.py."""
 
-import pytest
-from src.schema import JDExtractorSchema, ProjectResearcher, ResumeScore, ResumeWriter
+from src.schema import (
+    JDExtractorSchema,
+    ProjectResearcher,
+    ResumeWriter,
+    CoverLetterWriter,
+)
 
 
 class TestJDExtractorSchema:
@@ -49,7 +53,7 @@ class TestProjectResearcher:
         assert result.important_projects[0] == "Migration to microservices"
 
     def test_string_converted_to_list(self):
-        """field_validator should convert a comma-separated string to a list."""
+        """field_validator should convert a period-separated string to a list."""
         data = {
             "business_model": "SaaS",
             "product_and_services": "Cloud",
@@ -83,32 +87,35 @@ class TestProjectResearcher:
         assert result.important_projects == ["Only one project"]
 
 
-class TestResumeScore:
-    """Test the Resume Score schema."""
-
-    def test_valid_score(self):
-        data = {
-            "resume_score": 85,
-            "detailed_score": {
-                "hard_skills_score": 40,
-                "soft_skills_score": 18,
-                "keywords_score": 27,
-            },
-            "details": "Good match, missing some keywords.",
-        }
-        result = ResumeScore(**data)
-        assert result.resume_score == 85
-        assert result.detailed_score.hard_skills_score == 40
-
-
 class TestResumeWriter:
     """Test the Resume Writer schema."""
 
     def test_valid_output(self):
         data = {
-            "resume": "Rewritten resume content here...",
-            "explanation": "Improved bullet points for clarity.",
+            "resume": "Rewritten resume content with <modified>changed bullet</modified> here...",
+            "explanation": "Improved bullet points for clarity and JD alignment.",
         }
         result = ResumeWriter(**data)
         assert "Rewritten" in result.resume
-        assert result.explanation == "Improved bullet points for clarity."
+        assert result.explanation == "Improved bullet points for clarity and JD alignment."
+
+
+class TestCoverLetterWriter:
+    """Test the Cover Letter Writer schema."""
+
+    def test_valid_output(self):
+        data = {
+            "cover_letter": "Enhanced cover letter with <modified>tailored paragraph</modified> here...",
+            "explanation": "Tailored opening paragraph to reference company projects.",
+        }
+        result = CoverLetterWriter(**data)
+        assert "Enhanced" in result.cover_letter
+        assert "Tailored opening" in result.explanation
+
+    def test_cover_letter_is_string(self):
+        result = CoverLetterWriter(
+            cover_letter="Dear Hiring Manager...",
+            explanation="No changes needed.",
+        )
+        assert isinstance(result.cover_letter, str)
+        assert isinstance(result.explanation, str)

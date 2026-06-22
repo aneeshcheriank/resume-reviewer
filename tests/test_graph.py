@@ -1,6 +1,5 @@
 """Tests for the LangGraph workflow structure in src/chain.py."""
 
-import pytest
 from src.chain import built_graph
 from src.state import AgentState
 
@@ -24,16 +23,21 @@ class TestGraphStructure:
             "tool_call_project_research",
             "project_summarizer",
             "project_formatter",
-            "resume_scorer",
             "resume_writer",
+            "cover_letter_writer",
         ]
         for node in expected:
             assert node in nodes, f"Missing node: {node}"
 
+    def test_scorer_is_removed(self):
+        """resume_scorer should NOT be present in the simplified pipeline."""
+        graph = built_graph()
+        nodes = list(graph.nodes.keys())
+        assert "resume_scorer" not in nodes
+
     def test_start_node_goes_to_jd_extractor(self):
         """The graph should start at jd_extractor."""
         graph = built_graph()
-        # START should be connected to jd_extractor
         assert "__start__" in graph.nodes
 
     def test_conditional_edges_exist(self):
@@ -44,7 +48,7 @@ class TestGraphStructure:
 
 
 class TestStateInvariants:
-    """Test that the AgentState TypedDict is valid."""
+    """Test that the AgentState TypedDict matches the pipeline expectations."""
 
     def test_state_has_required_keys(self):
         """AgentState must define all keys the pipeline expects."""
@@ -52,6 +56,9 @@ class TestStateInvariants:
         required_keys = [
             "resume",
             "job_description",
+            "cover_letter",
+            "resume_pdf_path",
+            "cover_letter_pdf_path",
             "organization",
             "role",
             "department",
@@ -64,18 +71,23 @@ class TestStateInvariants:
             "product_and_services",
             "competition",
             "project_research_iteration",
-            "resume_score",
-            "detailed_score",
-            "details",
+            "enhanced_resume",
             "resume_modification_explanation",
-            "resume_write_iteration",
+            "enhanced_cover_letter",
+            "cover_letter_modification_explanation",
         ]
         for key in required_keys:
             assert key in state_keys, f"Missing state key: {key}"
 
+    def test_scoring_fields_removed(self):
+        """Scoring and loop fields should not be in the state."""
+        state_keys = list(AgentState.__annotations__.keys())
+        removed = ["resume_score", "detailed_score", "details", "resume_write_iteration"]
+        for key in removed:
+            assert key not in state_keys, f"Stale state key still present: {key}"
+
     def test_skills_fields_are_lists(self):
         """hard_skills, soft_skills, keywords should be list[str]."""
-        import typing
         annotations = AgentState.__annotations__
         assert annotations["hard_skills"] == list[str]
         assert annotations["soft_skills"] == list[str]
