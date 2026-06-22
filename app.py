@@ -136,7 +136,7 @@ def process_files(resume_pdf, jd_file, cover_letter_pdf):
 
     return (
         resume_orig_items, resume_enhanced_items, resume_path,
-        cl_orig_items, cl_enhanced_items, cl_path,
+        cl_orig_items, cl_enhanced_items, cover_letter_path,
         gr.update(choices=resume_checkbox_choices, value=resume_checkbox_default),
         gr.update(choices=cl_checkbox_choices, value=cl_checkbox_default),
         enhanced_resume, enhanced_cover_letter,
