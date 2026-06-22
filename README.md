@@ -11,9 +11,9 @@ A LangGraph agent pipeline backed by DeepSeek runs five steps:
 1. **JD Extraction** — parses the job description into organization, role, department, hard skills, soft skills, and keywords.
 2. **Company Research** — searches the web (DuckDuckGo) for the company's business model, products, competition, and key projects.
 3. **Resume Rewriting** — rewrites bullet points in the skills and experience sections to align with the JD and company domain, without fabricating experience.
-4. **Cover Letter Enhancement** — tailors the cover letter narrative using JD insights and company research (skipped if no cover letter is uploaded).
-5. **Review & Approve** — each changed bullet or paragraph is shown as a toggle: old text vs. new text. Check to keep, uncheck to reject.
-6. **PDF Editing** — final PDFs are written with the original fonts, sizes, and colors preserved using PyMuPDF.
+4. **Cover Letter Enhancement** — tailors the cover letter narrative using JD insights and company research; updates the date to today's date (skipped if no cover letter is uploaded).
+5. **Review & Approve** — each changed bullet or paragraph is shown as a checkbox with a short label. A detailed diff table below shows the full old vs. new comparison. Check to keep, uncheck to reject.
+6. **PDF Editing** — final PDFs are written with only the approved changes applied, preserving original fonts, sizes, and colors via PyMuPDF.
 
 ## Setup
 
@@ -49,8 +49,8 @@ python app.py
 Opens at `http://localhost:8000`. Three steps:
 
 1. **Upload** — select resume PDF, job description (.txt), and optional cover letter PDF
-2. **Review** — each suggested change shown as a checkbox with old → new text. Uncheck anything you want to reject
-3. **Download** — click "Apply Approved Changes & Generate PDFs" to get your edited files
+2. **Review** — each suggested change shown as a checkbox with a short label; a detailed old→new diff table appears below. Uncheck anything you want to reject
+3. **Download** — click "Apply Approved Changes & Generate PDFs" to get your edited files with only the approved changes applied
 
 ### CLI
 

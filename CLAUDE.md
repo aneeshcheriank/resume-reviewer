@@ -30,9 +30,9 @@ This is a single linear pass. The only conditional branch is the DuckDuckGo rese
 | Structured output | Pydantic `BaseModel` via `.with_structured_output()` | `src/schema.py` |
 | State | `AgentState` TypedDict with list reducer for `research_history` | `src/state.py` |
 | Tools | DuckDuckGo search (`DuckDuckGoSearchResults`, max_results=3) | `src/tools.py` |
-| PDF editing | PyMuPDF (fitz) — redact spans, rewrite with original fonts/sizes/colors | `src/pdf_editor.py` |
+| PDF editing | PyMuPDF (fitz) — group spans by Y-line, redact, write replacement lines from `new_text` with original fonts/sizes/colors | `src/pdf_editor.py` |
 | Change diffing | Parse into items, diff, apply user approve/reject choices | `src/diff_parser.py` |
-| UI | Gradio 6.x `gr.Blocks` with `gr.File` uploads, `gr.CheckboxGroup` for approve/reject, `gr.State` for persistence | `app.py` |
+| UI | Gradio 6.x `gr.Blocks` with `gr.File` uploads, `gr.CheckboxGroup` for approve/reject (short labels + `gr.Markdown` diff table), `gr.State` for persistence | `app.py` |
 | CLI | argparse — `--resume-pdf`, `--jd-file`, `--cover-letter-pdf` (optional) | `main.py` |
 
 ## File Map
@@ -52,15 +52,15 @@ resume-reviewer/
 │   │   ├── project_summarizer()       Summarize chat history
 │   │   ├── project_formatter()        Structured output (ProjectResearcher)
 │   │   ├── resume_writer()            Rewrite resume bullets (no scoring feedback)
-│   │   └── cover_letter_writer()      Enhance cover letter (no-op if empty)
+│   │   └── cover_letter_writer()      Enhance cover letter (no-op if empty); passes today_date for date update
 │   ├── chain.py               StateGraph definition — 7 nodes, linear edges, 1 conditional
 │   ├── config.py              max_search_calls = 5
 │   ├── diff_parser.py         parse_into_items(), diff_items(), apply_approvals()
 │   ├── env.py                 dotenv.load_dotenv()
 │   ├── inputs.py              get_jd(), get_resume(path), get_cover_letter(path)
 │   ├── model.py               get_llm() → ChatDeepSeek instance
-│   ├── pdf_editor.py          rewrite_pdf_with_new_text(original_path, new_text, output_path=None)
-│   ├── prompts.py             ChatPromptTemplate definitions for all 5 pipeline prompts
+│   ├── pdf_editor.py          rewrite_pdf_with_new_text(original_path, new_text, output_path=None), _group_spans_by_line(), edit_pdf()
+│   ├── prompts.py             ChatPromptTemplate definitions for all 5 pipeline prompts; cover_letter_writer_prompt includes {today_date}
 │   ├── schema.py              JDExtractorSchema, ProjectResearcher, ResumeWriter, CoverLetterWriter
 │   ├── state.py               AgentState TypedDict (20 fields)
 │   ├── tools.py               DuckDuckGoSearchResults tool + mapping dict
@@ -130,8 +130,8 @@ pytest tests/ -v                      # 37 tests
 
 1. **Upload** — three `gr.File` components for resume PDF, JD .txt, and optional cover letter PDF
 2. **Generate** — click "Analyze & Generate Suggestions" → pipeline runs
-3. **Review** — each changed bullet/paragraph shown as a checkbox with OLD → NEW text. Checked = approved (keep change), unchecked = rejected (revert to original)
-4. **Apply & Download** — click "Apply Approved Changes & Generate PDFs" → edited PDFs appear for download
+3. **Review** — each changed bullet/paragraph shown as a short checkbox label (`Change #N: <snippet>`). A Markdown diff table below the checkboxes shows the full old→new comparison. Checked = approved (keep change), unchecked = rejected (revert to original)
+4. **Apply & Download** — click "Apply Approved Changes & Generate PDFs" → edited PDFs appear for download with only approved changes applied and fonts/sizes/colors preserved
 
 ## Key Patterns & Rules
 
@@ -140,7 +140,8 @@ pytest tests/ -v                      # 37 tests
 - **Tool-call loop** — `router_project_research` checks `state["research_history"][-1].tool_calls`. If present → `tool_call_project_research` which executes tools and increments `project_research_iteration`. Capped at `max_search_calls`.
 - **Structured output** — `llm.with_structured_output(schema=SomeSchema)` enforces the LLM response to match the Pydantic model. The `Field(description=...)` strings guide the model.
 - **Cover letter no-op** — `cover_letter_writer()` checks `if not state.get("cover_letter", "").strip()` and returns early without calling the LLM.
-- **PDF editing** — `rewrite_pdf_with_new_text()`: (1) Build font cache from `page.get_fonts()` + `doc.extract_font(xref)`, (2) Extract spans via `page.get_text("dict")`, (3) Redact each span's bbox with white fill, (4) Write replacement text at original positions/original font/original size using `fitz.TextWriter`. Overwrite-safe via temp-file-then-move pattern.
+- **Cover letter date update** — `cover_letter_writer()` computes `date.today().strftime("%B %d, %Y")` and passes it as `today_date` to the prompt template, which instructs the LLM to replace the date at the top of the cover letter.
+- **PDF editing** — `rewrite_pdf_with_new_text()`: (1) Build font cache from `page.get_fonts()` + `doc.extract_font(xref)`, (2) Extract spans via `page.get_text("dict")`, (3) Group spans into logical lines by Y-coordinate tolerance (`_group_spans_by_line()`), (4) Redact each span's bbox with white fill, (5) Write one replacement line per original line group at the first span's position with its original font/size/color using `fitz.TextWriter`. The `new_text` parameter is split by newlines and mapped sequentially onto line groups.
 - **`<modified>` tags** — The resume_writer and cover_letter_writer prompts instruct the LLM to wrap ONLY changed bullets/paragraphs in `<modified>...</modified>`. These are stripped for final output but used by `diff_parser.py` for the approval UI.
-- **Approval flow** — `parse_into_items()` splits text into bullets (resume) or paragraphs (cover letter). `diff_items()` aligns by position and detects changes. `apply_approvals()` accepts a boolean list and builds the final text — approved items use the enhanced version, rejected items revert to original.
+- **Approval flow** — `parse_into_items()` splits text into bullets (resume) or paragraphs (cover letter). `diff_items()` aligns by position and detects changes. Only changed items get checkboxes (with short labels: `Change #N: <80-char snippet>`). A `_build_diff_markdown()` helper renders a full old→new comparison table. `apply_approvals()` accepts a boolean list and builds the final text — approved items use the enhanced version, rejected items revert to original. `_parse_approved_index()` extracts the 0-based item index from checkbox labels.
 - **API key** — Set via `DEEPSEEK` environment variable, read by `src/model.py` via `os.environ.get("DEEPSEEK")`.

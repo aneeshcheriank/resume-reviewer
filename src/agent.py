@@ -123,6 +123,9 @@ def cover_letter_writer(state: AgentState):
             "cover_letter_modification_explanation": "No cover letter provided.",
         }
 
+    from datetime import date
+    today = date.today().strftime("%B %d, %Y")  # e.g. "June 22, 2026"
+
     prompt = prompts.cover_letter_writer_prompt
     llm = get_llm()
     llm_with_structured_output = llm.with_structured_output(schema.CoverLetterWriter)
@@ -139,6 +142,7 @@ def cover_letter_writer(state: AgentState):
         "product_and_services": state.get("product_and_services", ""),
         "competition": state.get("competition", ""),
         "projects": state.get("projects", []),
+        "today_date": today,
     })
 
     output = response.model_dump()

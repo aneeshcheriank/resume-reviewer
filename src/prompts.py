@@ -105,9 +105,10 @@ cover_letter_writer_prompt = ChatPromptTemplate([
      1. NO HALLUCINATIONS: Never add skills, tools, or experiences not present in the original cover letter or resume.
      2. TAILOR TO COMPANY: Naturally reference the company's business model, products, and projects where relevant.
      3. KEYWORD INTEGRATION: Incorporate JD keywords organically into the narrative — do not keyword-stuff.
-     4. MAINTAIN STRUCTURE: Keep all formatting, date lines, addresses, salutations, closings, and paragraph count exactly intact.
-     5. PROFESSIONAL TONE: Write in crisp, active business language. Be confident but not hyperbolic.
-     6. PRESERVE PARAGRAPH COUNT: Do not add or remove paragraphs. Each original paragraph maps to exactly one rewritten paragraph.
+     4. UPDATE THE DATE: Replace the date at the top of the cover letter with today's date: {today_date}. Use "Month Day, Year" format (e.g. "June 22, 2026").
+     5. PRESERVE FORMATTING: Keep addresses, salutations, closings, signature blocks, and overall structure intact.
+     6. PROFESSIONAL TONE: Write in crisp, active business language. Be confident but not hyperbolic.
+     7. PRESERVE PARAGRAPH COUNT: Do not add or remove paragraphs. Each original paragraph maps to exactly one rewritten paragraph.
     """),
     ("human", """
      Original Cover Letter:

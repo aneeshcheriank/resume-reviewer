@@ -145,16 +145,55 @@ def edit_pdf(original_path, new_text, output_path=None):
     return output_path
 
 
-def rewrite_pdf_with_new_text(original_path, new_text, output_path=None):
-    """Higher-level function: maps new bullet/paragraph text onto original PDF spans.
+def _group_spans_by_line(spans, y_tolerance=2.0):
+    """Group spans into lines based on Y-coordinate proximity.
 
-    Parses both original page text and new text into structured items,
-    then redacts and rewrites span by span with the replacement text.
+    PDFs often split a single visual line into multiple spans
+    (e.g. one span per word or phrase). This groups spans that
+    share roughly the same baseline Y back into logical lines.
 
     Args:
-        original_path: Path to the original PDF.
-        new_text: Full rewritten text (should mirror the original's section/bullet structure).
-        output_path: Output path. If None, overwrites original.
+        spans: List of span dicts from _get_text_spans().
+        y_tolerance: Max Y difference (in points) for spans to be
+                     considered on the same line.
+
+    Returns:
+        List of line groups, each a list of span dicts in reading order.
+    """
+    if not spans:
+        return []
+
+    groups = []
+    current = [spans[0]]
+    current_y = spans[0]["bbox"][1]  # y0 of first span
+
+    for span in spans[1:]:
+        if abs(span["bbox"][1] - current_y) <= y_tolerance:
+            current.append(span)
+        else:
+            groups.append(current)
+            current = [span]
+            current_y = span["bbox"][1]
+    groups.append(current)
+    return groups
+
+
+def rewrite_pdf_with_new_text(original_path, new_text, output_path=None):
+    """Replace text in a PDF while preserving fonts, sizes, and colors.
+
+    Redacts every text span on each page, then writes replacement lines
+    from *new_text* at the original positions using the original formatting.
+
+    Spans are grouped into logical lines by Y-coordinate so that a single
+    new-text line is written per original visual line.
+
+    Args:
+        original_path: Path to the original PDF file.
+        new_text: The full replacement text. Should mirror the original's
+                  section / bullet / paragraph structure so that line counts
+                  align page-by-page.
+        output_path: Where to save the edited PDF. If None, overwrites
+                     original_path.
 
     Returns:
         The output path.
@@ -163,6 +202,8 @@ def rewrite_pdf_with_new_text(original_path, new_text, output_path=None):
         output_path = original_path
 
     doc = fitz.open(original_path)
+    new_lines = [l for l in new_text.split("\n")]  # preserve empty lines
+    new_line_idx = 0
 
     for page_num in range(len(doc)):
         page = doc.load_page(page_num)
@@ -172,39 +213,45 @@ def rewrite_pdf_with_new_text(original_path, new_text, output_path=None):
         if not spans:
             continue
 
-        # Redact all text spans
+        line_groups = _group_spans_by_line(spans)
+
+        # Redact all text on this page (whites it out)
         for span in spans:
             x0, y0, x1, y1 = span["bbox"]
             page.add_redact_annot(fitz.Rect(x0, y0, x1, y1), fill=(1, 1, 1))
-
         page.apply_redactions()
 
-        # Write replacement — for each span, find its replacement from new_text
+        # Write one replacement line per original line group
         tw = fitz.TextWriter(page.rect)
+        page_color_int = spans[0]["color"] if spans else 0
 
-        for span in spans:
-            font_obj = font_cache.get(span["font"])
+        for group in line_groups:
+            if new_line_idx >= len(new_lines):
+                break  # no more replacement text; extra original lines stay blank
+
+            new_line = new_lines[new_line_idx]
+            new_line_idx += 1
+
+            # Use the first span in the group for position and formatting
+            first = group[0]
+            font_obj = font_cache.get(first["font"])
             if font_obj is None:
                 try:
-                    clean_name = span["font"].split("+")[-1] if "+" in span["font"] else span["font"]
+                    clean_name = first["font"].split("+")[-1] if "+" in first["font"] else first["font"]
                     font_obj = fitz.Font(fontname=clean_name)
                 except Exception:
                     font_obj = fitz.Font("helv")
 
-            x0, y0, x1, y1 = span["bbox"]
+            x0, y0, x1, y1 = first["bbox"]
             tw.append(
                 pos=(x0, y1),
-                text=span["text"],
+                text=new_line,
                 font=font_obj,
-                fontsize=span["size"],
+                fontsize=first["size"],
             )
 
-        color_int = spans[0]["color"] if spans else 0
-        tw.write_text(page, color=_color_int_to_tuple(color_int))
+        tw.write_text(page, color=_color_int_to_tuple(page_color_int))
 
-    if output_path == original_path:
-        doc.save(output_path, incremental=True, deflate=True)
-    else:
-        doc.save(output_path, incremental=False, deflate=True)
+    doc.save(output_path, incremental=False, deflate=True)
     doc.close()
     return output_path

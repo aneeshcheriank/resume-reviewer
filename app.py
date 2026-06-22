@@ -6,6 +6,7 @@ Three-step workflow:
 3. Download the edited PDFs with only approved changes applied
 """
 
+import re
 import tempfile
 import os
 from pathlib import Path
@@ -41,28 +42,60 @@ def build_initial_state(resume_text, jd_text, cover_letter_text, resume_path, co
     }
 
 
-def _make_checkbox_label(index, old_text, new_text):
-    """Create a readable label for a change checkbox."""
-    old_short = old_text[:120] + "..." if len(old_text) > 120 else old_text
-    new_short = new_text[:120] + "..." if len(new_text) > 120 else new_text
-    return f"[{index+1}] OLD: {old_short}  →  NEW: {new_short}"
+def _make_checkbox_label(index, new_text):
+    """Create a short label for a change checkbox — just identifies the item."""
+    # Strip bullet markers and leading whitespace for a cleaner label
+    snippet = new_text.strip().lstrip("·-•*> \t")
+    snippet = snippet[:80] + "..." if len(snippet) > 80 else snippet
+    return f"Change #{index+1}: {snippet}"
+
+
+def _build_diff_markdown(diffs, mode="bullets"):
+    """Build a Markdown table showing old vs new text for all changed items."""
+    changed = [d for d in diffs if d["changed"]]
+    if not changed:
+        return "*No changes detected.*"
+
+    item_label = "Bullet" if mode == "bullets" else "Paragraph"
+    lines = [f"| # | Original {item_label} | Suggested {item_label} |",
+             "|---|-------------------|---------------------|"]
+    for d in changed:
+        old = d["old_text"].replace("\n", " ").replace("|", "\\|")
+        new = d["new_text"].replace("\n", " ").replace("|", "\\|")
+        lines.append(f"| {d['index']+1} | {old} | {new} |")
+    return "\n".join(lines)
+
+
+def _parse_approved_index(label):
+    """Parse the numeric index from a checkbox label.
+
+    Label format: "Change #N: <snippet>" — extract N (1-based).
+    Returns 0-based index, or -1 if parsing fails.
+    """
+    match = re.match(r"Change #(\d+)", label)
+    if match:
+        return int(match.group(1)) - 1
+    return -1
 
 
 def process_files(resume_pdf, jd_file, cover_letter_pdf):
     """Step 1: Read uploaded files, run the pipeline, return change data."""
+    empty_checkbox = gr.update(choices=[], value=[])
+    empty_md = ""
+
     if resume_pdf is None:
         return (
             [], [], [], "", "",
-            gr.update(choices=[], value=[]),
-            gr.update(choices=[], value=[]),
+            empty_checkbox, empty_checkbox,
+            empty_md, empty_md,
             "", "", "", "", "", "", "", "",
             "⚠️ Please upload a resume PDF.",
         )
     if jd_file is None:
         return (
             [], [], [], "", "",
-            gr.update(choices=[], value=[]),
-            gr.update(choices=[], value=[]),
+            empty_checkbox, empty_checkbox,
+            empty_md, empty_md,
             "", "", "", "", "", "", "", "",
             "⚠️ Please upload a job description file.",
         )
@@ -106,11 +139,11 @@ def process_files(resume_pdf, jd_file, cover_letter_pdf):
             cover_letter_text, enhanced_cover_letter, mode="paragraphs"
         )
 
-    # Build checkbox choices — only show changed items
+    # Build checkbox choices — only show changed items, with short labels
     resume_changed = [d for d in resume_diffs if d["changed"]]
     if resume_changed:
         resume_checkbox_choices = [
-            _make_checkbox_label(d["index"], d["old_text"], d["new_text"])
+            _make_checkbox_label(d["index"], d["new_text"])
             for d in resume_changed
         ]
         # Default: all approved
@@ -122,13 +155,17 @@ def process_files(resume_pdf, jd_file, cover_letter_pdf):
     cl_changed = [d for d in cl_diffs if d["changed"]]
     if cl_changed:
         cl_checkbox_choices = [
-            _make_checkbox_label(d["index"], d["old_text"], d["new_text"])
+            _make_checkbox_label(d["index"], d["new_text"])
             for d in cl_changed
         ]
         cl_checkbox_default = cl_checkbox_choices[:]
     else:
         cl_checkbox_choices = ["(No changes to cover letter paragraphs)"]
         cl_checkbox_default = []
+
+    # Build markdown diff tables for detailed old→new comparison
+    resume_diff_md = _build_diff_markdown(resume_diffs, mode="bullets")
+    cl_diff_md = _build_diff_markdown(cl_diffs, mode="paragraphs")
 
     # Build preview text with all changes applied
     preview = diff_parser.apply_approvals(resume_orig_items, resume_enhanced_items,
@@ -139,6 +176,7 @@ def process_files(resume_pdf, jd_file, cover_letter_pdf):
         cl_orig_items, cl_enhanced_items, cover_letter_path,
         gr.update(choices=resume_checkbox_choices, value=resume_checkbox_default),
         gr.update(choices=cl_checkbox_choices, value=cl_checkbox_default),
+        resume_diff_md, cl_diff_md,
         enhanced_resume, enhanced_cover_letter,
         resume_explanation, cover_explanation,
         preview, "",
@@ -159,16 +197,12 @@ def apply_and_generate(resume_orig_items, resume_enhanced_items, resume_path,
     # Determine which resume items were approved
     if resume_orig_items and resume_enhanced_items:
         # The approved_labels are the checkbox labels that were selected
-        # Parse out the index from each approved label
+        # Label format: "Change #N: <snippet>" — parse out N
         approved_indices = set()
         for label in resume_approved_labels:
-            # Label format: "[N] OLD: ...  →  NEW: ..."
-            # Extract N
-            try:
-                idx_str = label.split("]")[0].lstrip("[")
-                approved_indices.add(int(idx_str) - 1)
-            except (ValueError, IndexError):
-                continue
+            idx = _parse_approved_index(label)
+            if idx >= 0:
+                approved_indices.add(idx)
 
         # Build approvals list
         resume_approvals = []
@@ -187,11 +221,9 @@ def apply_and_generate(resume_orig_items, resume_enhanced_items, resume_path,
     if cl_path and cl_orig_items and cl_enhanced_items:
         approved_indices = set()
         for label in cl_approved_labels:
-            try:
-                idx_str = label.split("]")[0].lstrip("[")
-                approved_indices.add(int(idx_str) - 1)
-            except (ValueError, IndexError):
-                continue
+            idx = _parse_approved_index(label)
+            if idx >= 0:
+                approved_indices.add(idx)
 
         cl_approvals = []
         for i in range(len(cl_enhanced_items)):
@@ -252,25 +284,31 @@ with gr.Blocks(title="Resume Reviewer & Writer") as app:
     # ═══════════════ STEP 2: Review & Approve ═══════════════
     gr.Markdown("---")
     gr.Markdown("## Step 2: Review & Approve Changes")
-    gr.Markdown("Each checkbox is a suggested change. **Checked = Approved (keep)**. Uncheck to reject and revert to original.")
+    gr.Markdown("Each checkbox is a suggested change. **Checked = Approved (keep)**. "
+                "Uncheck to reject and revert to original.")
 
     with gr.Row():
         with gr.Column():
             gr.Markdown("### Resume Changes")
             resume_checkboxes = gr.CheckboxGroup(
-                label="Approve resume changes",
+                label="Approve resume changes — check to keep, uncheck to reject",
                 choices=[],
                 value=[],
                 interactive=True,
             )
+            # Detailed diff table shown below checkboxes
+            resume_diff_display = gr.Markdown("")
+
         with gr.Column():
             gr.Markdown("### Cover Letter Changes")
             cover_letter_checkboxes = gr.CheckboxGroup(
-                label="Approve cover letter changes",
+                label="Approve cover letter changes — check to keep, uncheck to reject",
                 choices=[],
                 value=[],
                 interactive=True,
             )
+            # Detailed diff table shown below checkboxes
+            cover_letter_diff_display = gr.Markdown("")
 
     gr.Markdown("### Change Explanations")
     with gr.Row():
@@ -301,9 +339,10 @@ with gr.Blocks(title="Resume Reviewer & Writer") as app:
             state_resume_orig, state_resume_enhanced, state_resume_path,
             state_cl_orig, state_cl_enhanced, state_cl_path,
             resume_checkboxes, cover_letter_checkboxes,
-            preview_text, gr.State(),  # not used for raw enhanced texts
+            resume_diff_display, cover_letter_diff_display,
+            preview_text, gr.State(),  # enhanced_resume, enhanced_cover_letter (not displayed directly)
             resume_explanation, cover_letter_explanation,
-            preview_text, gr.State(),
+            preview_text, gr.State(),  # preview (shown), "" (not used)
             status_msg,
         ],
     )
