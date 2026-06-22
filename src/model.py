@@ -7,7 +7,7 @@ def get_llm():
     config_env()
 
     return ChatDeepSeek(
-        model="deepseek-v4-flash",
+        model="deepseek-chat",
         temperature=0.0,
         api_key=os.environ.get("DEEPSEEK"),
         extra_body={"thinking": { # to disable the reasoning (creates problems in formating tool)
