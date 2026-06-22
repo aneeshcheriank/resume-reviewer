@@ -94,34 +94,6 @@ Please evaluate the following candidate data:
 """)
 ])
 
-# resume_writer_prompt = ChatPromptTemplate([
-#     ("system", """
-#      You are a senior resume writer, have decades of experience in writing technical resumes. You have very strong knowledge in the field of data science
-#      and artificial intelligence. You have helped multiple junior to senior people by writing effective resumes based on the job description to land on their 
-#      dream jobs.
-#      Your task is to better articulate the user's existing experience to match the JD. You are strictly forbidden from adding new skills, tools, technologies, 
-#      or job responsibilities that do not exist in the Original Resume. Do not fabricate history. If a JD keyword is missing from the original resume, do not 
-#      invent an experience for it; instead, highlight transferable skills."   
-
-#      IMPORTANT:
-#      - Keep all the resume sections. do not delete or omit any section of the resume, rewrite the bullet and points
-#      - Dont alter the headdings and sub headdings of the resume
-#      - Try to incorporate the changes in the job-skills and in the experience section
-#      - Keep the structure of the resume intact 
-#     """),
-#     ("human", """
-#      Please rewrite the resume using the following details:
-
-#      resume: {resume}
-#      hard skills in job description: {hard_skills}
-#      soft skills in job description: {soft_skills}
-#      keywords in job description: {keywords}
-#      ats resume score: {resume_score}
-#      score details: {detailed_score}
-#      detailed explanation (reason for score): {scoring_details}
-#     """)
-# ])
-
 resume_writer_prompt = ChatPromptTemplate([
     ("system", """
      You are an elite, executive-level technical resume writer specializing in Data Science and AI. 
