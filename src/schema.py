@@ -3,12 +3,12 @@ from pydantic import BaseModel, Field, field_validator
 import re
 
 class JDExtractorSchema(BaseModel):
-    organization: str = Field(description="the organization in which the postion is vaccant")
-    role: str = Field(description="the organization in which the postion is vaccant")
-    department: str = Field(description="the organization in which the postion is vaccant")
-    hard_skills: str = Field(description="the organization in which the postion is vaccant")
-    soft_skills: str = Field(description="the organization in which the postion is vaccant")
-    keywords: str = Field(description="the organization in which the postion is vaccant")
+    organization: str = Field(description="the organization/company in which the position is vacant")
+    role: str = Field(description="the role/position title described in the job description")
+    department: str = Field(description="the department the position belongs to")
+    hard_skills: list[str] = Field(description="essential technical skills required for the role (e.g. Python, SQL, Docker)")
+    soft_skills: list[str] = Field(description="interpersonal and complementary skills desired for the role (e.g. communication, team management)")
+    keywords: list[str] = Field(description="key terms and concepts mentioned in the job description")
 
 class ProjectResearcher(BaseModel):
     business_model: str = Field(description="Business of the organization")
