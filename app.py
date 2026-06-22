@@ -54,7 +54,7 @@ with gr.Blocks() as app:
 
         with gr.Column():
             gr.Markdown("### 2. paste Resume")
-            resume = gr.Textbox(lines=20, placeholder="Paste the job description here...", show_label=False)
+            resume = gr.Textbox(lines=20, placeholder="Paste your resume text here...", show_label=False)
     with gr.Row():
         button = gr.Button("Generate Tailored Resume", variant="primary") # variant="primary" makes it a prominent button
 
