@@ -1,12 +1,9 @@
 import gradio as gr
 
 from src import chain
-from src.inputs import get_resume
-from src.config import resume_path
 
 # 1. FIXED TYPO HERE (rewrtie -> rewrite)
-def rewrite_resume(jd):
-    resume = get_resume(resume_path)
+def rewrite_resume(jd, resume):
 
     build_chain = chain.built_graph()
     response = build_chain.invoke({
@@ -18,18 +15,22 @@ def rewrite_resume(jd):
         "organization": "",
         "role": "",
         "department": "",
-        "hard_skills": "",
-        "soft_skills": "",
-        "keywords": "",
+        "hard_skills": [],  
+        "soft_skills": [],  
+        "keywords": [],     
     
         # project_research
         "research_history": [],
         "projects": [],
         "business_model": "",
-        "product": "",
         "product_and_services": "",
         "competition": "",
         "project_research_iteration": 0,
+
+        # resume score
+        "resume_score": 0,  
+        "detailed_score": {},
+        "details": "",
 
         # resume writer
         "resume_write_iteration": 0
@@ -50,24 +51,33 @@ with gr.Blocks() as app:
         with gr.Column():
             gr.Markdown("### 1. Paste Job Description")
             job_description = gr.Textbox(lines=20, placeholder="Paste the job description here...", show_label=False)
-            button = gr.Button("Generate Tailored Resume", variant="primary") # variant="primary" makes it a prominent button
 
         with gr.Column():
-            gr.Markdown("### 2. Tailored Output")
-            resume = gr.Textbox(lines=20, label="Rewritten Resume")
+            gr.Markdown("### 2. paste Resume")
+            resume = gr.Textbox(lines=20, placeholder="Paste the job description here...", show_label=False)
+    with gr.Row():
+        button = gr.Button("Generate Tailored Resume", variant="primary") # variant="primary" makes it a prominent button
+
+    with gr.Row():
+        with gr.Column():
+            gr.Markdown("### 2. Rewritten Resume")
+            rewritten_resume = gr.Textbox(lines=20, label="Rewritten resume")
+        with gr.Column():
+            gr.Markdown("### Feedback")
+            exp = gr.Textbox(label="Modification Explanation", lines=5)
 
     # Bottom section for evaluation metrics
     gr.Markdown("---")
-    gr.Markdown("### 3. Evaluation & Feedback")
+    gr.Markdown("### 3. Evaluation")
     with gr.Row():
         score = gr.Textbox(label="Match Score", scale=1) # scale makes it smaller
-        exp = gr.Textbox(label="Modification Explanation", lines=5, scale=3) # scale makes it wider
+        
 
     # 2. FIXED CALL HERE (Matches the fixed function name)
     button.click(
         fn=rewrite_resume,
-        inputs=[job_description],
-        outputs=[resume, score, exp]
+        inputs=[job_description, resume],
+        outputs=[rewritten_resume, score, exp]
     )
 
 app.launch(server_name="0.0.0.0", server_port=8000, debug=True)
