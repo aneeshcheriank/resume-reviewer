@@ -20,9 +20,9 @@ if __name__== "__main__":
         "organization": "",
         "role": "",
         "department": "",
-        "hard_skills": "",
-        "soft_skills": "",
-        "keywords": "",
+        "hard_skills": [],
+        "soft_skills": [],
+        "keywords": [],
     
         # project_research
         "research_history": [],
@@ -40,7 +40,7 @@ if __name__== "__main__":
     file_path = Path(output_path)
     file_path.parent.mkdir(parents=True, exist_ok=True)
 
-    with open(file_path, "w") as f:
+    with open(file_path, "w", encoding="utf-8") as f:
         f.write(response.get("resume", ""))
 
 
